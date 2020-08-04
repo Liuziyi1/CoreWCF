@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
+using System.Xml;
 
 namespace Helpers
 {
@@ -69,6 +70,21 @@ namespace Helpers
             ChannelFactory<T> channelFactory = new ChannelFactory<T>(httpBinding, new EndpointAddress(new Uri("http://localhost:8080/BasicWcfService/basichttp.svc")));
             T proxy = channelFactory.CreateChannel();
             return proxy;
+        }
+
+        public static string GetCorrelationId(Message m)
+        {
+            XmlDocument xmlDocument = new XmlDocument();
+            xmlDocument.LoadXml(m.ToString());
+            XmlNamespaceManager xmlNamespaceManager = new XmlNamespaceManager(new NameTable());
+            xmlNamespaceManager.AddNamespace("d", "http://schemas.microsoft.com/2004/09/ServiceModel/Diagnostics");
+            string xpath = string.Format("//{0}:{1}", "d", "ActivityId");
+            XmlNode xmlNode = xmlDocument.SelectSingleNode(xpath, xmlNamespaceManager);
+            if (xmlNode == null)
+            {
+                throw new FormatException(string.Format("Could not find activity Id header ({0}:{1}) in message: ", "ActivityId", "http://schemas.microsoft.com/2004/09/ServiceModel/Diagnostics", m.ToString()));
+            }
+            return xmlNode.Attributes["CorrelationId"].Value;
         }
     }
 }

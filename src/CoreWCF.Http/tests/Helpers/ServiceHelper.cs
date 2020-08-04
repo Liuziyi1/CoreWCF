@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore;
+﻿using CoreWCF.Channels;
+using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Net;
+using System.Xml;
 #if NET472
 using System.Security.Authentication;
 #endif // NET472
@@ -85,5 +87,19 @@ namespace Helpers
             }
         }
 
+        public static string GetCorrelationId(Message m)
+        {
+            XmlDocument xmlDocument = new XmlDocument();
+            xmlDocument.LoadXml(m.ToString());
+            XmlNamespaceManager xmlNamespaceManager = new XmlNamespaceManager(new NameTable());
+            xmlNamespaceManager.AddNamespace("d", "http://schemas.microsoft.com/2004/09/ServiceModel/Diagnostics");
+            string xpath = string.Format("//{0}:{1}", "d", "ActivityId");
+            XmlNode xmlNode = xmlDocument.SelectSingleNode(xpath, xmlNamespaceManager);
+            if (xmlNode == null)
+            {
+                throw new FormatException(string.Format("Could not find activity Id header ({0}:{1}) in message: ", "ActivityId", "http://schemas.microsoft.com/2004/09/ServiceModel/Diagnostics", m.ToString()));
+            }
+            return xmlNode.Attributes["CorrelationId"].Value;
+        }
     }
 }
