@@ -17,6 +17,20 @@ namespace CoreWCF
             _basicHttpSecurity.Mode = securityMode;
         }
 
+        public BasicHttpSecurity Security
+        {
+            get { return this._basicHttpSecurity; }
+            set
+            {
+                if (value == null)
+                {
+                    throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("value");
+                }
+
+                this._basicHttpSecurity = value;
+            }
+        }
+
         internal WSMessageEncoding MessageEncoding { get; set; } = BasicHttpBindingDefaults.MessageEncoding;
 
         internal override BasicHttpSecurity BasicHttpSecurity => _basicHttpSecurity;

@@ -34,6 +34,12 @@ namespace Helpers
             };
         }
 
+        public static Binding GetBindingWithCredential()
+        {
+           BasicHttpBinding basichttpbinding = new BasicHttpBinding(BasicHttpSecurityMode.TransportCredentialOnly);
+            basichttpbinding.Security.Transport.ClientCredentialType = HttpClientCredentialType.Windows;
+            return basichttpbinding;
+        }
         //public static Binding GetBufferedModHttp2Binding()
         //{
         //    BasicHttpBinding basicHttpBinding = new BasicHttpBinding();
@@ -133,6 +139,21 @@ namespace Helpers
             })
             .UseUrls("http://localhost:8080", "https://localhost:8443")
             .UseStartup<TStartup>();
+
+        public static IWebHostBuilder CreateWebHostBuilder<TStartup>(ITestOutputHelper outputHelper,string url) where TStartup : class =>
+           WebHost.CreateDefaultBuilder(new string[0])
+#if DEBUG
+            .ConfigureLogging((ILoggingBuilder logging) =>
+            {
+                logging.AddProvider(new XunitLoggerProvider(outputHelper));
+                logging.AddFilter("Default", LogLevel.Debug);
+                logging.AddFilter("Microsoft", LogLevel.Debug);
+                logging.SetMinimumLevel(LogLevel.Debug);
+            })
+#endif // DEBUG
+           
+           .UseUrls(url)
+           .UseStartup<TStartup>();
 
         public static void CloseServiceModelObjects(params System.ServiceModel.ICommunicationObject[] objects)
         {
