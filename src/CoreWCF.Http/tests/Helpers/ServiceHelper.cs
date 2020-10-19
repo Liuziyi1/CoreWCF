@@ -151,7 +151,16 @@ namespace Helpers
                 logging.SetMinimumLevel(LogLevel.Debug);
             })
 #endif // DEBUG
-           
+            //.UseKestrel(options =>
+            //{
+            //    options.Listen(IPAddress.Loopback, 8088, listenOptions =>
+            //    {
+            //        if (Debugger.IsAttached)
+            //        {
+            //            listenOptions.UseConnectionLogging();
+            //        }
+            //    });
+            //})
            .UseUrls(url)
            .UseStartup<TStartup>();
 
